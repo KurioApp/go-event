@@ -139,8 +139,8 @@ func (b *Bus) Publish(name string, body interface{}) {
 	}
 }
 
-// PublishBody publish using the body, event name will be defered from the type name.
-func PublishBody(p Publisher, body interface{}) {
+// PublishEvent publish the event, event name will be defered from the type name.
+func PublishEvent(p Publisher, body interface{}) {
 	name := reflect.TypeOf(body).Name()
 	p.Publish(name, body)
 }
