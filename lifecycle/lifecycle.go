@@ -1,15 +1,17 @@
-package eventd
+package lifecycle
 
 import (
 	"context"
 	"sync"
+
+	"github.com/KurioApp/go-eventd"
 )
 
-// NewLifeCycle constructs new life cycle.
+// New constructs new life cycle.
 // Create life cycle required to end it by invokes End() method.
-func NewLifeCycle(h EventHandler) *LifeCycle {
-	bus := NewBus()
-	eventCtx := ContextWithBus(context.Background(), bus)
+func New(h EventHandler) *LifeCycle {
+	bus := eventd.NewBus()
+	eventCtx := eventd.ContextWithBus(context.Background(), bus)
 
 	lc := &LifeCycle{
 		ctx:          eventCtx,
@@ -24,15 +26,15 @@ func NewLifeCycle(h EventHandler) *LifeCycle {
 // LifeCycle of the app.
 type LifeCycle struct {
 	sync.RWMutex
-	events []Event
+	events []eventd.Event
 
 	ctx          context.Context
-	bus          *Bus
+	bus          *eventd.Bus
 	eventHandler EventHandler
 }
 
 func (lc *LifeCycle) listenForEvents() {
-	lc.bus.Subscribe(HandlerFunc(func(e Event) {
+	lc.bus.Subscribe(eventd.HandlerFunc(func(e eventd.Event) {
 		lc.Lock()
 		defer lc.Unlock()
 
@@ -63,21 +65,21 @@ func (lc *LifeCycle) handleEvents() {
 
 // EventHandler handles the events.
 type EventHandler interface {
-	HandleEvent([]Event)
+	HandleEvent([]eventd.Event)
 }
 
 // EventHandlerFunc is the adapter of EventHandler.
-type EventHandlerFunc func([]Event)
+type EventHandlerFunc func([]eventd.Event)
 
 // HandleEvent calls f(s)
-func (f EventHandlerFunc) HandleEvent(events []Event) {
+func (f EventHandlerFunc) HandleEvent(events []eventd.Event) {
 	f(events)
 }
 
 type nopEventHandler struct {
 }
 
-func (h nopEventHandler) HandleEvent([]Event) {}
+func (h nopEventHandler) HandleEvent([]eventd.Event) {}
 
 // NopEventHandler implements no-operation EventHandler.
 func NopEventHandler() EventHandler {
