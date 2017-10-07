@@ -49,7 +49,7 @@ func TestPublishBody(t *testing.T) {
 	}))
 
 	msg := "Hello World!"
-	eventd.PublishBody(bus, msg)
+	eventd.PublishEvent(bus, msg)
 	if got, want := len(events), 1; got != want {
 		t.Fatal("got:", got, "want:", want)
 	}
